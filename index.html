@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C1 Use of English</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #d7e1ec, #fefefe);
+            margin: 0;
+            padding: 0;
+        }
+        
+        header {
+            background-color: #003366;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 20px;
+        }
+        
+        .menu button {
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 8px;
+            background-color: #0059b3;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .menu button:hover {
+            background-color: #003d80;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        #exercise {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .question {
+            background-color: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        
+        .options label {
+            display: block;
+            margin-top: 8px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+        
+        .options label:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .options input[type="radio"] {
+            margin-right: 8px;
+        }
+        
+        .text-input {
+            width: 100%;
+            padding: 8px;
+            font-size: 1em;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .text-input:focus {
+            border-color: #0059b3;
+            outline: none;
+        }
+        
+        button.nav {
+            margin-top: 15px;
+            padding: 12px 20px;
+            font-size: 1em;
+            background-color: #0059b3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        button.nav:hover {
+            background-color: #003d80;
+        }
+        
+        .section-title {
+            background-color: #003366;
+            color: white;
+            padding: 10px;
+            margin: 20px 0 10px 0;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .score-display {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .score-display h2 {
+            color: #003366;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        
+        .percentage {
+            font-size: 1.2em;
+            color: #0059b3;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #666;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 30px;
+            color: #d32f2f;
+            background-color: #ffebee;
+            border-radius: 6px;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>C1 USE OF ENGLISH</h1>
+    </header>
+    <main>
+        <div id="menu" class="menu"></div>
+        <div id="exercise" class="hidden"></div>
+        <div id="result" class="hidden"></div>
+    </main>
+
+    <script>
+        // Sample data structure - this would normally be loaded from external JSON files
+        const sampleData = {
+            "multipleChoice": [
+                {
+                    "question": "The company's financial situation has _____ dramatically over the past year.",
+                    "options": ["improved", "enhanced", "developed", "progressed"],
+                    "answer": "improved"
+                },
+                {
+                    "question": "She has a _____ for languages and can speak five fluently.",
+                    "options": ["talent", "skill", "gift", "ability"],
+                    "answer": "gift"
+                },
+                {
+                    "question": "The research team made a significant _____ in cancer treatment.",
+                    "options": ["breakthrough", "breakdown", "breakout", "break-in"],
+                    "answer": "breakthrough"
+                }
+            ],
+            "openCloze": [
+                {
+                    "sentence": "Despite _____ tired, she continued working on her project.",
+                    "answer": "being"
+                },
+                {
+                    "sentence": "The museum is open _____ the public every day except Monday.",
+                    "answer": "to"
+                },
+                {
+                    "sentence": "He couldn't help _____ when he heard the funny story.",
+                    "answer": "laughing"
+                }
+            ],
+            "wordFormation": [
+                {
+                    "sentence": "The _____ (PERFORM) was absolutely spectacular.",
+                    "answer": "performance"
+                },
+                {
+                    "sentence": "She showed great _____ (DETERMINE) in achieving her goals.",
+                    "answer": "determination"
+                },
+                {
+                    "sentence": "The weather forecast predicts _____ (OCCASION) showers.",
+                    "answer": "occasional"
+                }
+            ],
+            "sentenceTransformation": [
+                {
+                    "question": "Complete the second sentence so that it has a similar meaning to the first sentence. 'I haven't seen him for three years.' → It's three years _____ him.",
+                    "answer": "since I saw"
+                },
+                {
+                    "question": "Complete the second sentence. 'She is too young to drive.' → She isn't _____ to drive.",
+                    "answer": "old enough"
+                }
+            ]
+        };
+
+        // Sample sets index - this would normally be loaded from sets-index.json
+        const sampleSets = [
+            { id: 1, type: "practice", file: "set-01.json" },
+            { id: 2, type: "practice", file: "set-02.json" },
+            { id: 3, type: "test", file: "test-01.json" }
+        ];
+
+        let currentScore = 0;
+        let totalQuestions = 0;
+        let userAnswers = {};
+
+        // Load menu from data
+        async function loadMenu() {
+            const menuDiv = document.getElementById('menu');
+            menuDiv.innerHTML = '<div class="loading">Loading exercises...</div>';
+            
+            try {
+                // In a real implementation, this would fetch from 'data/sets-index.json'
+                const sets = sampleSets;
+                
+                menuDiv.innerHTML = '';
+                sets.forEach(set => {
+                    const btn = document.createElement('button');
+                    btn.textContent = `${set.type.toUpperCase()} - Set ${set.id}`;
+                    btn.onclick = () => loadSet(set.file);
+                    menuDiv.appendChild(btn);
+                });
+            } catch (error) {
+                menuDiv.innerHTML = '<div class="error">Error loading menu. Please try again later.</div>';
+                console.error('Error loading menu:', error);
+            }
+        }
+
+        // Load exercise set from data file
+        async function loadSet(filename) {
+            const menuDiv = document.getElementById('menu');
+            const exerciseDiv = document.getElementById('exercise');
+            const resultDiv = document.getElementById('result');
+            
+            // Hide menu and result, show exercise
+            menuDiv.classList.add('hidden');
+            resultDiv.classList.add('hidden');
+            exerciseDiv.classList.remove('hidden');
+            
+            exerciseDiv.innerHTML = '<div class="loading">Loading exercise...</div>';
+            
+            try {
+                // In a real implementation, this would fetch from `data/${filename}`
+                const data = sampleData;
+                renderExercise(data);
+            } catch (error) {
+                exerciseDiv.innerHTML = '<div class="error">Error loading exercise. Please try again.</div>';
+                console.error('Error loading exercise:', error);
+            }
+        }
+
+        // Render the complete exercise
+        function renderExercise(data) {
+            const exerciseDiv = document.getElementById('exercise');
+            exerciseDiv.innerHTML = '';
+            
+            currentScore = 0;
+            totalQuestions = 0;
+            userAnswers = {};
+            
+            // Multiple Choice Section
+            if (data.multipleChoice && data.multipleChoice.length > 0) {
+                const sectionTitle = document.createElement('div');
+                sectionTitle.className = 'section-title';
+                sectionTitle.textContent = 'PART 1: Multiple Choice';
+                exerciseDiv.appendChild(sectionTitle);
+                
+                data.multipleChoice.forEach((q, index) => {
+                    totalQuestions++;
+                    const questionDiv = createMultipleChoiceQuestion(q, index, 'mc');
+                    exerciseDiv.appendChild(questionDiv);
+                });
+            }
+            
+            // Open Cloze Section
+            if (data.openCloze && data.openCloze.length > 0) {
+                const sectionTitle = document.createElement('div');
+                sectionTitle.className = 'section-title';
+                sectionTitle.textContent = 'PART 2: Open Cloze';
+                exerciseDiv.appendChild(sectionTitle);
+                
+                data.openCloze.forEach((q, index) => {
+                    totalQuestions++;
+                    const questionDiv = createTextQuestion(q, index, 'oc', 'Fill in the blank:');
+                    exerciseDiv.appendChild(questionDiv);
+                });
+            }
+            
+            // Word Formation Section
+            if (data.wordFormation && data.wordFormation.length > 0) {
+                const sectionTitle = document.createElement('div');
+                sectionTitle.className = 'section-title';
+                sectionTitle.textContent = 'PART 3: Word Formation';
+                exerciseDiv.appendChild(sectionTitle);
+                
+                data.wordFormation.forEach((q, index) => {
+                    totalQuestions++;
+                    const questionDiv = createTextQuestion(q, index, 'wf', 'Complete the sentence using the correct form of the word in brackets:');
+                    exerciseDiv.appendChild(questionDiv);
+                });
+            }
+            
+            // Sentence Transformation Section
+            if (data.sentenceTransformation && data.sentenceTransformation.length > 0) {
+                const sectionTitle = document.createElement('div');
+                sectionTitle.className = 'section-title';
+                sectionTitle.textContent = 'PART 4: Key Word Transformations';
+                exerciseDiv.appendChild(sectionTitle);
+                
+                data.sentenceTransformation.forEach((q, index) => {
+                    totalQuestions++;
+                    const questionDiv = createTextQuestion(q, index, 'st', '');
+                    exerciseDiv.appendChild(questionDiv);
+                });
+            }
+            
+            // Submit button
+            const submitBtn = document.createElement('button');
+            submitBtn.className = 'nav';
+            submitBtn.textContent = 'Submit Answers';
+            submitBtn.onclick = () => calculateScore(data);
+            exerciseDiv.appendChild(submitBtn);
+        }
+
+        // Create multiple choice question
+        function createMultipleChoiceQuestion(question, index, prefix) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question';
+            
+            const qText = document.createElement('p');
+            qText.textContent = `${index + 1}. ${question.question}`;
+            qText.style.fontWeight = 'bold';
+            questionDiv.appendChild(qText);
+            
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options';
+            
+            question.options.forEach(option => {
+                const label = document.createElement('label');
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = `${prefix}_${index}`;
+                input.value = option;
+                
+                label.appendChild(input);
+                label.append(` ${option}`);
+                optionsDiv.appendChild(label);
+            });
+            
+            questionDiv.appendChild(optionsDiv);
+            return questionDiv;
+        }
+
+        // Create text input question
+        function createTextQuestion(question, index, prefix, instructionText) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question';
+            
+            if (instructionText) {
+                const instruction = document.createElement('p');
+                instruction.textContent = instructionText;
+                instruction.style.fontStyle = 'italic';
+                instruction.style.color = '#666';
+                questionDiv.appendChild(instruction);
+            }
+            
+            const qText = document.createElement('p');
+            qText.textContent = `${index + 1}. ${question.sentence || question.question}`;
+            qText.style.fontWeight = 'bold';
+            questionDiv.appendChild(qText);
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'text-input';
+            input.name = `${prefix}_${index}`;
+            input.placeholder = 'Enter your answer here...';
+            
+            questionDiv.appendChild(input);
+            return questionDiv;
+        }
+
+        // Calculate final score
+        function calculateScore(data) {
+            currentScore = 0;
+            const formData = new FormData(document.querySelector('#exercise'));
+            
+            // Check Multiple Choice answers
+            if (data.multipleChoice) {
+                data.multipleChoice.forEach((q, index) => {
+                    const userAnswer = document.querySelector(`input[name="mc_${index}"]:checked`);
+                    if (userAnswer && userAnswer.value.toLowerCase() === q.answer.toLowerCase()) {
+                        currentScore++;
+                    }
+                });
+            }
+            
+            // Check Open Cloze answers
+            if (data.openCloze) {
+                data.openCloze.forEach((q, index) => {
+                    const userAnswer = document.querySelector(`input[name="oc_${index}"]`).value.trim();
+                    if (userAnswer.toLowerCase() === q.answer.toLowerCase()) {
+                        currentScore++;
+                    }
+                });
+            }
+            
+            // Check Word Formation answers
+            if (data.wordFormation) {
+                data.wordFormation.forEach((q, index) => {
+                    const userAnswer = document.querySelector(`input[name="wf_${index}"]`).value.trim();
+                    if (userAnswer.toLowerCase() === q.answer.toLowerCase()) {
+                        currentScore++;
+                    }
+                });
+            }
+            
+            // Check Sentence Transformation answers
+            if (data.sentenceTransformation) {
+                data.sentenceTransformation.forEach((q, index) => {
+                    const userAnswer = document.querySelector(`input[name="st_${index}"]`).value.trim();
+                    // For sentence transformation, we'll be more flexible with the matching
+                    if (userAnswer.toLowerCase().includes(q.answer.toLowerCase()) || 
+                        q.answer.toLowerCase().includes(userAnswer.toLowerCase())) {
+                        currentScore++;
+                    }
+                });
+            }
+            
+            showResult(currentScore, totalQuestions);
+        }
+
+        // Display results
+        function showResult(score, total) {
+            const exerciseDiv = document.getElementById('exercise');
+            const resultDiv = document.getElementById('result');
+            
+            exerciseDiv.classList.add('hidden');
+            resultDiv.classList.remove('hidden');
+            
+            const percentage = Math.round((score / total) * 100);
+            let performanceLevel = '';
+            
+            if (percentage >= 80) performanceLevel = 'Excellent!';
+            else if (percentage >= 65) performanceLevel = 'Good';
+            else if (percentage >= 50) performanceLevel = 'Fair';
+            else performanceLevel = 'Needs improvement';
+            
+            resultDiv.innerHTML = `
+                <div class="score-display">
+                    <h2>Your Score: ${score} / ${total}</h2>
+                    <div class="percentage">${percentage}% - ${performanceLevel}</div>
+                    <button class="nav" onclick="returnToMenu()">Return to Menu</button>
+                    <button class="nav" onclick="retakeExercise()" style="margin-left: 10px;">Retake Exercise</button>
+                </div>
+            `;
+        }
+
+        // Return to main menu
+        function returnToMenu() {
+            document.getElementById('exercise').classList.add('hidden');
+            document.getElementById('result').classList.add('hidden');
+            document.getElementById('menu').classList.remove('hidden');
+        }
+
+        // Retake current exercise
+        function retakeExercise() {
+            document.getElementById('result').classList.add('hidden');
+            document.getElementById('exercise').classList.remove('hidden');
+            
+            // Clear all form inputs
+            const inputs = document.querySelectorAll('#exercise input');
+            inputs.forEach(input => {
+                if (input.type === 'radio') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+            });
+        }
+
+        // Initialize the application
+        loadMenu();
+    </script>
+</body>
+</html>
